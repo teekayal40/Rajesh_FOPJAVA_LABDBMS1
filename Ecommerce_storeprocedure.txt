@@ -1,0 +1,40 @@
+DELIMITER //
+CREATE PROCEDURE  `proc_rating_report`(OUT Supplier_id INT, OUT Supplier_name VARCHAR(50),OUT Rating INT,OUT Type_Of_Service VARCHAR(50))
+
+BEGIN
+	select su.SUPP_ID, su.supp_name,avg(ra.RAT_RATSTARS)
+    into Supplier_id,
+		 Supplier_name,
+         Rating
+    from mydatabase.supplier su,
+		 mydatabase.customer cu,
+		 mydatabase.supplier_pricing sp,
+		 mydatabase.product pr,
+		 mydatabase.order od,
+		 mydatabase.rating ra
+	where su.SUPP_ID = sp.supp_id
+	  and sp.pricing_id = od.pricing_id
+	  and pr.pro_id = sp.pro_id
+	  and cu.cus_id = od.cus_id 
+	  and od.ord_id = ra.ord_id
+	group by su.supp_id,su.supp_name
+	order by supp_id
+  ;
+  
+  IF Rating = 5 THEN
+	SET Type_Of_Service = 'Excellent Service';
+  ELSE IF Rating > 4 && Rating < 5 THEN
+			SET Type_Of_Service = 'Good Service';
+	   ELSE IF Rating > 2 && Rating < 4 THEN
+				SET Type_Of_Service = 'Average Service';
+			ELSE SET Type_of_Service = 'Poor Service';
+            END IF;
+	    END IF;
+	END IF;
+    
+END //
+
+DELIMITER ;
+
+CALL proc_rating_report(@Supplier_id,@Supplier_name,@Rating,@Type_Of_Service);
+SELECT @Supplier_id,@Supplier_name,@Rating,@Type_Of_Service;

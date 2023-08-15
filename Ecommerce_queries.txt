@@ -1,0 +1,49 @@
+/* 9) Display customer name and gender whose names start or end with character 'A'.*/
+select cus_name, cus_gender from mydatabase.customer
+where cus_name like "A%" or cus_name like "%A"
+;
+
+/* 8) Display the Id and Name of the Product ordered after “2021-10-05”. */
+select b.pro_id,b.pro_name
+from mydatabase.order a, mydatabase.product b,mydatabase.supplier_pricing c
+where a.ord_date > "2021-10-05"
+and   a.pricing_id = c.pricing_id
+and   b.pro_id = c.pro_id
+;
+
+/* 7) Find the least expensive product from each category and print the table with category id, name, product name and price of the product c.pro_id, */
+select b.cat_id,a.cat_name,b.pro_name,c.supp_price 
+from mydatabase.category a,mydatabase.product b,mydatabase.supplier_pricing c
+where a.cat_id = b.cat_id
+and b.pro_id = c.pro_id
+and c.supp_price in (select min(d.supp_price) 
+					from mydatabase.supplier_pricing d, mydatabase.product e 
+                    where e.pro_id = d.pro_id
+					group by e.cat_id)
+
+;
+
+/* 6) Display the Supplier details who can supply more than one product. */
+select a.supp_name,a.supp_city,a.supp_phone, count(*) as Multi_products from 
+supplier a,
+supplier_pricing b
+where a.supp_id = b.supp_id
+group by a.supp_name,a.supp_city,a.supp_phone
+having count(b.PRO_ID) > 1
+;
+
+/* 5) Display all the orders along with product name ordered by a customer having Customer_Id=2 */
+select a.ord_id, b.pro_id,b.pro_name,a.ord_date,a.ord_amount 
+from mydatabase.order a, mydatabase.product b,mydatabase.supplier_pricing c
+where a.cus_id = 2
+and   a.pricing_id = c.pricing_id
+and   b.pro_id = c.pro_id
+;
+
+/* 4) Display the total number of customers based on gender who have placed individual orders of worth at least Rs.3000. */
+SELECT a.cus_gender,count(*) FROM 
+mydatabase.customer a,
+mydatabase.order b
+where a.CUS_ID = b.CUS_ID
+and b.ORD_AMOUNT >= 3000
+group by a.CUS_GENDER;
